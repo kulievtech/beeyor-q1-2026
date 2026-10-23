@@ -5,31 +5,42 @@ test(
   "Verify a user can login to the application with valid credentials",
   { tag: ["@smoke", "@regression"] },
   async ({ page }) => {
-    // 1. Go to the start page
-    await goToStartPage(page);
+    await test.step("Go to the start page", async () => {
+      await goToStartPage(page);
+    });
 
-    // 2. Navigate to Login Page and wait until it's loaded
-    const loginPage = await goToLoginPage(page);
+    const loginPage =
+      await test.step("Navigate to the Login Page", async () => {
+        return goToLoginPage(page);
+      });
 
-    // 3. Waint until Login Page is loaded
-    await loginPage.waitUntilPageIsLoaded();
+    await test.step("Wait until the Login Page is loaded", async () => {
+      await loginPage.waitUntilPageIsLoaded();
+    });
 
-    // 4. Input username
-    await loginPage.inputUsername("students");
+    await test.step("Input username", async () => {
+      await loginPage.inputUsername("students");
+    });
 
-    // 5. Input password
-    await loginPage.inputPassword("Default1!");
+    await test.step("Input password", async () => {
+      await loginPage.inputPassword("Default1!");
+    });
 
-    // 6. Click Login button and get MyAccountPage
-    const accountPage = await loginPage.clickLoginButton();
+    const accountPage =
+      await test.step("Click Login and get the My Account Page", async () => {
+        return loginPage.clickLoginButton();
+      });
 
-    // 7. Wait until My Account Page is loaded
-    await accountPage.waitUntilPageIsLoaded();
+    await test.step("Wait until the My Account Page is loaded", async () => {
+      await accountPage.waitUntilPageIsLoaded();
+    });
 
-    // 8. Get Log out text
-    const logOutText = await accountPage.getLogOutText();
+    const logOutText = await test.step("Get Log out text", async () => {
+      return accountPage.getLogOutText();
+    });
 
-    // 9. Verify Login was successful and Log out text is visible
-    expect(logOutText).toBe("Log out");
+    await test.step("Verify login was successful", async () => {
+      expect(logOutText).toBe("Log out");
+    });
   },
 );
