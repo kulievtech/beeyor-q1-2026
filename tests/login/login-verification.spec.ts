@@ -3,7 +3,7 @@ import { goToLoginPage, goToStartPage } from "../../actions/navigation";
 
 test(
   "Verify a user can login to the application with valid credentials",
-  { tag: ["@smoke", "@regression", "@login"] },
+  { tag: ["@smoke", "@regression", "@login", "@positive"] },
   async ({ page }) => {
     await test.step("Go to the start page", async () => {
       await goToStartPage(page);
