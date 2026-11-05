@@ -15,7 +15,7 @@ export default class HomePage extends BasePage {
     return this.getText("//p[contains(., 'Trending Now')]");
   }
 
-  getTrendingProductsTable() {
+  getTrendingProductsTable(): ProductsTable {
     return new ProductsTable(
       this.page.locator(
         "//div[contains(@class, 'group')][contains(@class, 'has-background')][div[contains(., 'Trending Products')]]",
@@ -23,7 +23,7 @@ export default class HomePage extends BasePage {
     );
   }
 
-  getNewArrivalsProductsTable() {
+  getNewArrivalsProductsTable(): ProductsTable {
     return new ProductsTable(
       this.page.locator(
         "//div[contains(@class, 'group')][contains(@class, 'has-background')][div[contains(., 'New Arrivals')]]",

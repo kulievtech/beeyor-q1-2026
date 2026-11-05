@@ -1,9 +1,11 @@
 import { test as base } from "@playwright/test";
 import MyAccountPage from "../pages/my-account/MyAccountPage";
 import { goToLoginPage, goToStartPage } from "../actions/navigation";
+import Navigation from "../pages/Navigation";
 
 type Fixtures = {
   myAccountPage: MyAccountPage;
+  navigation: Navigation;
 };
 
 export const test = base.extend<Fixtures>({
@@ -18,6 +20,11 @@ export const test = base.extend<Fixtures>({
     await myAccountPage.waitUntilPageIsLoaded();
 
     await use(myAccountPage);
+  },
+  navigation: async ({ page }, use) => {
+    await goToStartPage(page);
+    const navigation = new Navigation(page);
+    await use(navigation);
   },
 });
 
