@@ -9,7 +9,7 @@ import parseNumeric from "../utilities/parseNumeric";
 export class ProductsTable extends BaseComponent {
   async getCurrentProducts(): Promise<Product[]> {
     const products = this.element.locator(
-      "//ul[contains(@class, 'products')]//li[contains(@class, 'product')]", // 16 products
+      "//ul[contains(@class, 'products')]//li[contains(@class, 'product')]", // 8 products
     );
     await products.first().waitFor({ state: "visible" });
     const allProducts = await products.all();
@@ -17,6 +17,11 @@ export class ProductsTable extends BaseComponent {
     return productInstances;
   }
 }
+
+/**
+ * Product class represents a single product within a products table.
+ * It extends the BaseComponent class and provides methods to interact with the product's elements.
+ */
 
 export class Product extends BaseComponent {
   async getTitle(): Promise<string> {
@@ -45,7 +50,7 @@ export class Product extends BaseComponent {
     return classAttr?.includes("added") ?? false;
   }
 
-  async isProductPurchsable(): Promise<boolean> {
+  async isProductPurchasable(): Promise<boolean> {
     await this.hover("//img");
     return await this.isVisible("//a[contains(@aria-label, 'Add to cart')]");
   }
