@@ -35,7 +35,7 @@ test(
       myAccountPage.getLogOutText());
 
     await test.step("Verify login was successful", async () => {
-      expect(logOutText).toBe("Log out");
+      expect(logOutText).toBe("dsadasdsa");
     });
   },
 );
