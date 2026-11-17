@@ -15,7 +15,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   /* Workers are isolated OS processes that run your tests in parallel, each with its own browser instance. 
   /* Allows for faster execution by handling multiple test files or scenarios concurrently without interfering with each other */
-  workers: process.env.CI ? 4 : undefined,
+  workers: process.env.CI ? 2 : undefined,
   /* Reporter to use. */
   /* A reporter transforms raw test execution data into human-readable formats. */
   /* Provides summaries, detailed failure information (errors, call stacks, screenshots, traces), and progress updates for debugging, collaboration, and CI/CD pipelines */

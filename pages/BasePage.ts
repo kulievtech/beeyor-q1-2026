@@ -34,6 +34,7 @@ export default class BasePage {
 
   async getText(selector: string): Promise<string> {
     const locator = this.page.locator(selector);
+    await locator.scrollIntoViewIfNeeded();
     const text = (await locator.innerText()).trim();
     return text;
   }
