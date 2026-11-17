@@ -4,6 +4,7 @@ name: Playwright Tests
 # It can be started manually from the GitHub UI or run on a schedule.
 
 on:
+  # Manual trigger from GitHub Actions UI.
   workflow_dispatch:
     inputs:
       environment:
@@ -13,7 +14,7 @@ on:
         type: choice
         options:
           - "UAT"
-          - "Demo"
+          - "Staging"
       test_type:
         description: "Choose Test Suite to Run"
         required: true
@@ -22,34 +23,82 @@ on:
         options:
           - "Smoke"
           - "Regression"
+          - "All"
       test_name_filter:
-        description: "Optional: Filter tests by name (regex supported)"
+        description: "Optional: filter tests by name or regex"
         required: false
         default: ""
         type: string
+
+  # Scheduled runs for automated smoke/regression checks.
+  # Cron uses UTC, so these correspond to 6:00 AM and 12:00 PM EST.
   schedule:
-    # Run on weekdays at 6:00 AM and 12:00 PM EST.
-    # GitHub Actions cron syntax is in UTC, so these map to 11:00 and 17:00 UTC.
     - cron: "0 11 * * 1-5" # 6:00 AM EST
     - cron: "0 17 * * 1-5" # 12:00 PM EST
+
 jobs:
   test:
+    # Keep the workflow isolated and predictable on a single Ubuntu runner.
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      # Use the selected deployment target for manual runs, otherwise default to Staging.
+      TARGET_ENV: ${{ github.event.inputs.environment || 'Staging' }}
+      # Scheduled jobs always run the regression suite to ensure nightly validation is stricter.
+      TEST_TYPE: ${{ github.event_name == 'schedule' && 'Regression' || github.event.inputs.test_type }}
+      TEST_NAME_FILTER: ${{ github.event.inputs.test_name_filter || '' }}
     steps:
+      # Pull the repository code so the workflow can execute tests against the current branch.
       - uses: actions/checkout@v4
+
+      # Install the Node.js runtime required by Playwright and the project dependencies.
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+
+      # Install all project dependencies from package-lock.json for a clean, reproducible build.
       - name: Install dependencies
         run: npm ci
+
+      # Download browser binaries required by Playwright tests in CI.
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+
+      # Run the test suite with optional filtering.
+      # Smoke filters to @smoke tests, Regression filters to @regression tests, and All runs everything.
       - name: Run Playwright tests
-        run: npx playwright test
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          RUN_CMD=(npx playwright test)
+
+          case "${TEST_TYPE:-All}" in
+            Smoke)
+              RUN_CMD+=(--grep "@smoke")
+              ;;
+            Regression)
+              RUN_CMD+=(--grep "@regression")
+              ;;
+            All)
+              ;;
+            *)
+              echo "Unsupported test type: ${TEST_TYPE}"
+              exit 1
+              ;;
+          esac
+
+          if [ -n "${TEST_NAME_FILTER:-}" ]; then
+            RUN_CMD+=(--grep "${TEST_NAME_FILTER}")
+          fi
+
+          echo "Running: ${RUN_CMD[*]}"
+          "${RUN_CMD[@]}"
+
+      # Save the HTML report for debugging failed runs, even when the job is cancelled.
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: playwright-report/
-          retention-days: 30
+          retention-days: 14
