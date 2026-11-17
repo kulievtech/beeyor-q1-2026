@@ -19,7 +19,9 @@ export default defineConfig({
   /* Reporter to use. */
   /* A reporter transforms raw test execution data into human-readable formats. */
   /* Provides summaries, detailed failure information (errors, call stacks, screenshots, traces), and progress updates for debugging, collaboration, and CI/CD pipelines */
-  reporter: process.env.CI ? "blob" : "html",
+  reporter: process.env.CI
+    ? [["html", { open: "never", outputFolder: "playwright-report" }], ["blob"]]
+    : "html",
   /* Max time one test can run (30s) */
   timeout: 30 * 1000,
   /* The use object is a central place for defining options that configure 
