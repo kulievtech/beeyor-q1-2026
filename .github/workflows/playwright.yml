@@ -1,27 +1,55 @@
 name: Playwright Tests
+
+# This workflow runs browser tests automatically in GitHub Actions.
+# It can be started manually from the GitHub UI or run on a schedule.
+
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Choose Environment to Run Tests Against"
+        required: true
+        default: "Staging"
+        type: choice
+        options:
+          - "UAT"
+          - "Demo"
+      test_type:
+        description: "Choose Test Suite to Run"
+        required: true
+        default: "All"
+        type: choice
+        options:
+          - "Smoke"
+          - "Regression"
+      test_name_filter:
+        description: "Optional: Filter tests by name (regex supported)"
+        required: false
+        default: ""
+        type: string
+  schedule:
+    # Run on weekdays at 6:00 AM and 12:00 PM EST.
+    # GitHub Actions cron syntax is in UTC, so these map to 11:00 and 17:00 UTC.
+    - cron: "0 11 * * 1-5" # 6:00 AM EST
+    - cron: "0 17 * * 1-5" # 12:00 PM EST
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
